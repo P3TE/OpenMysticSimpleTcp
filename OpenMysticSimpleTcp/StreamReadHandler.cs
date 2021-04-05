@@ -11,7 +11,8 @@ namespace OpenMysticSimpleTcp.ReadWrite
 
         private const int _DefaultThreadJoinTimeoutMilliseconds = 1000; //1 Second.
         private const int _DefaultBufferSize = 1024; //Bytes.
-        
+        byte[] receivedDataBuffer = new byte[_DefaultBufferSize];
+
         private readonly int threadJoinDuration;
         private readonly int bufferSize;
 
@@ -48,7 +49,15 @@ namespace OpenMysticSimpleTcp.ReadWrite
 
         private void Read()
         {
-            dataStream.Read()
+            int readAmount = dataStream.Read(receivedDataBuffer, 0, receivedDataBuffer.Length);
+            if (readAmount < 0) {
+                //Something bad happened!
+                //TODO - Handle.
+            } else {
+                byte[] completeDataOnlyBuffer = new byte[readAmount];
+                System.Buffer.BlockCopy(receivedDataBuffer, 0, completeDataOnlyBuffer, 0, readAmount);
+                receivedDataQueue.Enqueue(completeDataOnlyBuffer);
+            }
         }
 
         public bool GetLatestData(out byte[] data)
