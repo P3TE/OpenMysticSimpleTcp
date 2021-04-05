@@ -1,0 +1,48 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.8": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.8": []
+  },
+  "packageFolders": {
+    "/home/p3te/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "/home/p3te/mystic/OpenMysticSimpleTcp/OpenMysticSimpleTcp/OpenMysticSimpleTcp/OpenMysticSimpleTcp.csproj",
+      "projectName": "OpenMysticSimpleTcp",
+      "projectPath": "/home/p3te/mystic/OpenMysticSimpleTcp/OpenMysticSimpleTcp/OpenMysticSimpleTcp/OpenMysticSimpleTcp.csproj",
+      "packagesPath": "/home/p3te/.nuget/packages/",
+      "outputPath": "/home/p3te/mystic/OpenMysticSimpleTcp/OpenMysticSimpleTcp/OpenMysticSimpleTcp/obj/",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "/home/p3te/.config/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net48"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net48": {
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net48": {
+        "runtimeIdentifierGraphPath": "/usr/lib/mono/msbuild/Current/bin/RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

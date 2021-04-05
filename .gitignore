@@ -1,3 +1,8 @@
+# A quick note from P3TE:
+# This .gitignore is based on github's 'Unity' template.
+# This is a purely C# project, but I couldn't find a C# template on github, so I went overkill with this.
+# It might be worth cleaning this up later
+
 # This .gitignore file should be placed at the root of your Unity project directory
 #
 # Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
