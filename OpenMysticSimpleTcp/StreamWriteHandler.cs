@@ -1,48 +1,53 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace OpenMysticSimpleTcp.ReadWrite
-{
-    public class StreamReadHandler
-    {
+namespace OpenMysticSimpleTcp.ReadWrite {
+    public class StreamWriteHandler {
 
         private const int _DefaultThreadJoinTimeoutMilliseconds = 1000; //1 Second.
-        private const int _DefaultBufferSize = 1024; //Bytes.
-        byte[] receivedDataBuffer = new byte[_DefaultBufferSize];
 
         private readonly int threadJoinDuration;
-        private readonly int bufferSize;
 
         private Stream dataStream;
-        
-        private Thread readThread;
+
+        private Thread writeThread;
         private bool threadRunning = false;
+
+        private ConcurrentQueue<ByteArraySubsection> dataToSend = new ConcurrentQueue<ByteArraySubsection>();
 
         private ConcurrentQueue<StreamEventBase> receivedEventQueue = new ConcurrentQueue<StreamEventBase>();
 
-        public StreamReadHandler(Stream dataStream, int threadJoinDurationMilliseconds = _DefaultThreadJoinTimeoutMilliseconds)
-        {
+        private ManualResetEvent waitHandle = new ManualResetEvent(false);
 
+        public StreamWriteHandler(Stream dataStream, int threadJoinDurationMilliseconds = _DefaultThreadJoinTimeoutMilliseconds) {
+            
             this.dataStream = dataStream;
             this.threadJoinDuration = threadJoinDurationMilliseconds;
-            
+
             threadRunning = true;
-            readThread = new Thread(ReadThreadHandle)
-            {
+            writeThread = new Thread(WriteThreadHandle) {
                 IsBackground = true
             };
-            readThread.Start();
+            writeThread.Start();
         }
 
-        private void ReadThreadHandle()
-        {
-            while (threadRunning)
-            {
+        private void WriteThreadHandle() {
+            while (threadRunning) {
                 try {
-                    Read();
+
+                    waitHandle.WaitOne();
+
+                    if (!threadRunning) {
+                        break;
+                    }
+
+                    waitHandle.Reset();
+
+                    SendAllWaitingData();
+
                 } catch (Exception e) {
                     if (threadRunning) {
                         StreamConnectionEvent readThreadExceptionEvent = new StreamConnectionEvent(StreamConnectionEvent.StreamEventType.UnexpectedException, e);
@@ -53,57 +58,51 @@ namespace OpenMysticSimpleTcp.ReadWrite
             }
         }
 
-        private void Read()
-        {
-            int readAmount = dataStream.Read(receivedDataBuffer, 0, receivedDataBuffer.Length);
-            if (readAmount < 0) {
-                StreamConnectionEvent readThreadClosedEvent = new StreamConnectionEvent(StreamConnectionEvent.StreamEventType.ReadStreamClosedUnexpectedly);
-                receivedEventQueue.Enqueue(readThreadClosedEvent);
-                StopThread();
-            } else {
-                byte[] completeDataOnlyBuffer = new byte[readAmount];
-                System.Buffer.BlockCopy(receivedDataBuffer, 0, completeDataOnlyBuffer, 0, readAmount);
-                receivedEventQueue.Enqueue(new StreamDataReceivedEvent(completeDataOnlyBuffer));
+        private void SendAllWaitingData() {
+            while (dataToSend.TryDequeue(out ByteArraySubsection bufferToWrite)) {
+                dataStream.Write(bufferToWrite.data, bufferToWrite.offset, bufferToWrite.count);
             }
         }
 
         #region Thread Safe Functions
 
+        public void QueueDataToSend(ByteArraySubsection data) {
+            dataToSend.Enqueue(data);
+        }
+
         public bool GetLatestData(out StreamEventBase latestEvent) {
             return receivedEventQueue.TryDequeue(out latestEvent);
         }
 
-        public bool StopThread()
-        {
-            if (!threadRunning)
-            {
+        public bool StopThread() {
+            if (!threadRunning) {
                 //We are already shutting down, ignore.
                 return true;
             }
             threadRunning = false;
 
-
-            try
-            {
-                dataStream.Close();
+            try {
+                waitHandle.Set();
+            } catch (Exception) {
+                //We're closing anyway, ignore this exception.
             }
-            catch (Exception)
-            {
+
+            try {
+                dataStream.Close();
+            } catch (Exception) {
                 //We're closing anyway, ignore this exception.
             }
 
             bool threadShutdownSuccess = true;
-            
-            if (Thread.CurrentThread != readThread)
-            {
+
+            if (Thread.CurrentThread != writeThread) {
                 //If we are not the thread we are wanting to close, join the thread.
-                threadShutdownSuccess = readThread.Join(threadJoinDuration);
+                threadShutdownSuccess = writeThread.Join(threadJoinDuration);
             }
 
             return threadShutdownSuccess;
         }
 
         #endregion
-
     }
 }

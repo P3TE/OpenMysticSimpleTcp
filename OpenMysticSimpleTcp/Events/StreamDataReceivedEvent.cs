@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace OpenMysticSimpleTcp.ReadWrite {
-	public abstract class StreamDataReceivedEvent : StreamEventBase {
+	public class StreamDataReceivedEvent : StreamEventBase {
 
 		private byte[] receivedData;
 
