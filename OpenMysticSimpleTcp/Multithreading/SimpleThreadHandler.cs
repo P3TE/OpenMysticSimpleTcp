@@ -6,91 +6,86 @@ using System.Threading;
 namespace OpenMysticSimpleTcp.Multithreading {
     public abstract class SimpleThreadHandler {
 
-        private const int _DefaultThreadJoinTimeoutMilliseconds = 1000; //1 Second.
+        public enum ThreadState {
+            Uninitialised,
+            Running,
+            Stopping,
+            Stopped
+        }
 
         private Thread workerThread;
-        private volatile bool threadShutdownInProgress = false;
         private object threadShutdownLock = new object();
-
-        private DelayedResult<bool> threadStopResult;
-
-        private readonly int threadJoinTimeoutMilliseconds;
 
         private readonly bool isBackgroundThread;
 
-        public bool ThreadRunning { get; private set; } = false;
+        public ThreadState CurrentThreadState {
+            get;
+            private set;
+        } = ThreadState.Uninitialised;
 
-        public SimpleThreadHandler(bool isBackground = true, int threadJoinTimeoutMilliseconds = _DefaultThreadJoinTimeoutMilliseconds) {
+        public bool ThreadRunning {
+            get {
+                return CurrentThreadState == ThreadState.Running;
+            }
+        }
+
+        public SimpleThreadHandler(bool isBackground = true) {
 
             this.isBackgroundThread = isBackground;
-            this.threadJoinTimeoutMilliseconds = threadJoinTimeoutMilliseconds;
 
         }
 
-        protected void StartWorkerThread(bool stopExistingThread = false) {
+        protected void StartWorkerThread(bool stopExistingThread = false, Object threadParameter = null) {
 
             if (ThreadRunning && !stopExistingThread) {
                 throw new Exception("Existing thread is already running!");
             }
 
-            DelayedResult<bool> stopThreadResult = StopThreadIfApplicableNohup();
-            if (stopThreadResult.ExecutionComplete) {
-                SpinupWorkerThread();
-            } else {
-                ThreadPool.QueueUserWorkItem(StartupThreadHandle, stopThreadResult);
+            if (stopExistingThread) {
+                StopThreadIfApplicable();
             }
 
+            SpinupWorkerThread(threadParameter);
+
         }
 
-        private void StartupThreadHandle(Object stateInfo) {
-            //Try and stop the existing thread:
-            DelayedResult<bool> stopThreadResult = (DelayedResult<bool>) stateInfo;
-            stopThreadResult.WaitForExecutionCompleteion();
-            //Start up the new thread.
-            SpinupWorkerThread();
-        }
-
-        private void SpinupWorkerThread() {
-            ThreadRunning = true;
+        private void SpinupWorkerThread(Object threadParameter) {
+            CurrentThreadState = ThreadState.Running;
             workerThread = new Thread(ThreadHandle) {
                 IsBackground = isBackgroundThread
             };
-            workerThread.Start();
+            workerThread.Start(threadParameter);
         }
 
-        public DelayedResult<bool> StopThreadIfApplicableNohup() {
+        public void StopThreadIfApplicable() {
 
             lock (threadShutdownLock) {
 
-                if (threadShutdownInProgress) {
-                    return threadStopResult;
-                }
-
-                threadStopResult = new DelayedResult<bool>();
-
                 if (!ThreadRunning) {
                     //Already stopped.
-                    threadStopResult.OnExecutionCompleted(true);
-                    return threadStopResult;
+                    return;
                 }
 
-                ThreadRunning = false;
-                threadShutdownInProgress = true;
+                CurrentThreadState = ThreadState.Stopping;
+                StopThreadSynchronous();
+                CurrentThreadState = ThreadState.Stopped;
 
             }
 
-            ThreadPool.QueueUserWorkItem(StopThreadWorkerThreadHandle);
-
-            return threadStopResult;
         }
 
-        private void StopThreadWorkerThreadHandle(Object stateInfo) {
-            bool threadShutdownSuccessfully = StopThreadSynchronous();
-            threadStopResult.OnExecutionCompleted(threadShutdownSuccessfully);
-            threadShutdownInProgress = false;
-        }
-
-        protected bool JoinThisThreadIfApplicable() {
+        /// <summary>
+        /// A quick note on joining the thread:
+        /// Before calling this function, think about whether you actually need it.
+        /// I personally used to think it was important that I wait for 
+        /// any and every thread to stop when I had finished with it.
+        /// However, now that I think about it, most of the time, it's not really required.
+        /// In most cases, just calling stop to release the resources used by the thread
+        /// and letting the thread finish of it's own accord.
+        /// </summary>
+        /// <param name="threadJoinTimeoutMilliseconds"></param>
+        /// <returns></returns>
+        public virtual bool JoinThisThreadIfApplicable(int threadJoinTimeoutMilliseconds = 0) {
             bool result = true;
             if (Thread.CurrentThread != workerThread) {
                 result = workerThread.Join(threadJoinTimeoutMilliseconds);
@@ -100,7 +95,7 @@ namespace OpenMysticSimpleTcp.Multithreading {
 
         protected abstract bool StopThreadSynchronous();
 
-        protected abstract void ThreadHandle();
+        protected abstract void ThreadHandle(Object threadParameter);
 
     }
 }

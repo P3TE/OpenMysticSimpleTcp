@@ -6,3 +6,11 @@ S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\OpenMysticSimpleTcp\OpenMysticSim
 S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\OpenMysticSimpleTcp\OpenMysticSimpleTcp\obj\Debug\netstandard2.0\OpenMysticSimpleTcp.AssemblyInfo.cs
 S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\OpenMysticSimpleTcp\OpenMysticSimpleTcp\obj\Debug\netstandard2.0\OpenMysticSimpleTcp.dll
 S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\OpenMysticSimpleTcp\OpenMysticSimpleTcp\obj\Debug\netstandard2.0\OpenMysticSimpleTcp.pdb
+S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\obj\Debug\netstandard2.0\OpenMysticSimpleTcp.csprojAssemblyReference.cache
+S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\obj\Debug\netstandard2.0\OpenMysticSimpleTcp.AssemblyInfoInputs.cache
+S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\obj\Debug\netstandard2.0\OpenMysticSimpleTcp.AssemblyInfo.cs
+S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\obj\Debug\netstandard2.0\OpenMysticSimpleTcp.dll
+S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\obj\Debug\netstandard2.0\OpenMysticSimpleTcp.pdb
+S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\bin\Debug\netstandard2.0\OpenMysticSimpleTcp.deps.json
+S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\bin\Debug\netstandard2.0\OpenMysticSimpleTcp.dll
+S:\Git\OpenMysticSimpleTcp\OpenMysticSimpleTcp\bin\Debug\netstandard2.0\OpenMysticSimpleTcp.pdb

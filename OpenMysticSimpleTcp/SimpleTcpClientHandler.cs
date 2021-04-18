@@ -81,14 +81,11 @@ namespace OpenMysticSimpleTcp.ReadWrite {
             }
         }
 
-        public DelayedResult<bool> CloseConnectionIfApplicable() {
-
-            DelayedResult<bool> result = new DelayedResult<bool>();
+        public void CloseConnectionIfApplicable() {
 
             if (!ConnectionInProgress) {
                 //The connection is already closed.
-                result.OnExecutionCompleted(true);
-                return result;
+                return;
             }
 
             clientConnectionState = ClientConnectionState.ConnectionClosed;
@@ -117,8 +114,6 @@ namespace OpenMysticSimpleTcp.ReadWrite {
                 //If we are not the thread we are wanting to close, join the thread.
                 threadShutdownSuccess = tcpConnectionThread.Join(threadJoinDuration);
             }
-
-            return result;
 
         }
 
