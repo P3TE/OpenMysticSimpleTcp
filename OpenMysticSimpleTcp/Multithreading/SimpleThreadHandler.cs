@@ -7,10 +7,10 @@ namespace OpenMysticSimpleTcp.Multithreading {
     public abstract class SimpleThreadHandler {
 
         public enum ThreadState {
-            Uninitialised,
-            Running,
-            Stopping,
-            Stopped
+            Uninitialised = 0,
+            Running = 10,
+            Stopping = 20,
+            Stopped = 21
         }
 
         private Thread workerThread;

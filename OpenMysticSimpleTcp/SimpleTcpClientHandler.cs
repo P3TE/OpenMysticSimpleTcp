@@ -1,4 +1,5 @@
 ﻿using OpenMysticSimpleTcp.Multithreading;
+using OpenMysticSimpleTcp.ReadWrite;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -6,8 +7,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace OpenMysticSimpleTcp.ReadWrite {
-    public class SimpleTcpClientHandler {
+namespace OpenMysticSimpleTcp {
+    public class SimpleTcpClientHandler : SimpleThreadHandler {
 
         private const int _DefaultThreadJoinTimeoutMilliseconds = 1000; //1 Second.
 
@@ -20,54 +21,23 @@ namespace OpenMysticSimpleTcp.ReadWrite {
 
         private ClientConnectionState clientConnectionState = ClientConnectionState.Uninitialised;
 
-        private readonly int threadJoinDuration;
-
         private TcpClient tcpClient;
-
-        private Thread tcpConnectionThread;
 
         private IPEndPoint connectionEndpoint;
 
         private StreamReadHandler streamReadHandler;
         private StreamWriteHandler streamWriteHandler;
 
-        public SimpleTcpClientHandler(int threadJoinDurationMilliseconds = _DefaultThreadJoinTimeoutMilliseconds) {
-            this.threadJoinDuration = threadJoinDurationMilliseconds;
+        public SimpleTcpClientHandler() {
+
         }
 
         public void AttemptConnection(IPEndPoint endpoint) {
 
             this.connectionEndpoint = endpoint;
             this.clientConnectionState = ClientConnectionState.AttemptingConnection;
+            base.StartWorkerThread();
 
-            tcpConnectionThread = new Thread(ConnectThreadHandle) {
-                IsBackground = true
-            };
-            tcpConnectionThread.Start();
-
-        }
-
-        private void ConnectThreadHandle() {
-
-            CloseConnectionIfApplicable();
-
-            try {
-                clientConnectionState = ClientConnectionState.AttemptingConnection;
-                tcpClient = new TcpClient();
-                tcpClient.Connect(connectionEndpoint);
-                
-                NetworkStream networkStream = tcpClient.GetStream();
-                streamReadHandler = new StreamReadHandler(networkStream, this.threadJoinDuration);
-                streamWriteHandler = new StreamWriteHandler(networkStream, this.threadJoinDuration);
-
-                clientConnectionState = ClientConnectionState.Connected;
-            } catch (Exception e) {
-                if (ConnectionInProgress) {
-                    //TODO - An error occurred...
-                }
-                //TODO...
-            }
-            
         }
 
         public bool ConnectionInProgress {
@@ -79,6 +49,34 @@ namespace OpenMysticSimpleTcp.ReadWrite {
                 }
                 return false;
             }
+        }
+
+        protected override void ThreadHandle(object threadParameter) {
+            CloseConnectionIfApplicable();
+
+            try {
+                clientConnectionState = ClientConnectionState.AttemptingConnection;
+                tcpClient = new TcpClient();
+                tcpClient.Connect(connectionEndpoint);
+
+                NetworkStream networkStream = tcpClient.GetStream();
+                streamReadHandler = new StreamReadHandler(networkStream);
+                streamWriteHandler = new StreamWriteHandler(networkStream);
+
+                clientConnectionState = ClientConnectionState.Connected;
+            } catch (Exception e) {
+                if (ConnectionInProgress) {
+                    //TODO - An error occurred...
+                }
+                //TODO...
+            }
+        }
+
+        protected override bool StopThreadSynchronous() {
+
+            CloseConnectionIfApplicable();
+
+            return true;
         }
 
         public void CloseConnectionIfApplicable() {
@@ -106,13 +104,6 @@ namespace OpenMysticSimpleTcp.ReadWrite {
                 streamWriteHandler.StopThread();
             } catch (Exception) {
                 //Ignore, we are attempting to close anyway.
-            }
-
-            bool threadShutdownSuccess = true;
-
-            if (Thread.CurrentThread != tcpConnectionThread) {
-                //If we are not the thread we are wanting to close, join the thread.
-                threadShutdownSuccess = tcpConnectionThread.Join(threadJoinDuration);
             }
 
         }
