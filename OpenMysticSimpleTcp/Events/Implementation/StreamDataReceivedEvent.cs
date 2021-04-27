@@ -13,5 +13,8 @@ namespace OpenMysticSimpleTcp.ReadWrite {
 			return receivedData;
 		}
 
+		public override void HandleEvent(IStreamEventHandler streamEventHandler) {
+			streamEventHandler.OnDataReceivedEvent(this);
+		}
 	}
 }

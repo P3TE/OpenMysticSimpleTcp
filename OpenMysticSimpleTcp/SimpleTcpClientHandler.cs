@@ -28,8 +28,10 @@ namespace OpenMysticSimpleTcp {
         private StreamReadHandler streamReadHandler;
         private StreamWriteHandler streamWriteHandler;
 
-        public SimpleTcpClientHandler() {
+        private ConcurrentQueue<StreamEventBase> receivedEventQueue = new ConcurrentQueue<StreamEventBase>();
 
+        public SimpleTcpClientHandler() {
+            
         }
 
         public void AttemptConnection(IPEndPoint endpoint) {
@@ -49,6 +51,10 @@ namespace OpenMysticSimpleTcp {
                 }
                 return false;
             }
+        }
+
+        public bool TryDequeueNextEvent(out StreamEventBase streamEventBase) {
+            return receivedEventQueue.TryDequeue(out streamEventBase);
         }
 
         protected override void ThreadHandle(object threadParameter) {

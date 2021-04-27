@@ -21,12 +21,13 @@ namespace OpenMysticSimpleTcp.ReadWrite
         private Thread readThread;
         private bool threadRunning = false;
 
-        private ConcurrentQueue<StreamEventBase> receivedEventQueue = new ConcurrentQueue<StreamEventBase>();
+        private ConcurrentQueue<StreamEventBase> receivedEventQueue;
 
-        public StreamReadHandler(Stream dataStream, int threadJoinDurationMilliseconds = _DefaultThreadJoinTimeoutMilliseconds)
+        public StreamReadHandler(Stream dataStream, ConcurrentQueue<StreamEventBase> receivedEventQueue, int threadJoinDurationMilliseconds = _DefaultThreadJoinTimeoutMilliseconds)
         {
 
             this.dataStream = dataStream;
+            this.receivedEventQueue = receivedEventQueue;
             this.threadJoinDuration = threadJoinDurationMilliseconds;
             
             threadRunning = true;

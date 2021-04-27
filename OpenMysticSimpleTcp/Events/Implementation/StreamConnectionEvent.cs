@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace OpenMysticSimpleTcp.ReadWrite {
-    class StreamConnectionEvent : StreamEventBase {
+    public class StreamConnectionEvent : StreamEventBase {
 
         public enum StreamEventType {
             ReadStreamClosedUnexpectedly = 10,
@@ -26,5 +26,8 @@ namespace OpenMysticSimpleTcp.ReadWrite {
             return associatedException;
         }
 
+        public override void HandleEvent(IStreamEventHandler streamEventHandler) {
+            streamEventHandler.OnStreamConnectionEvent(this);
+        }
     }
 }
