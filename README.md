@@ -1,7 +1,9 @@
 # OpenMysticSimpleTcp #
 A simple library for helping create TCP connections. Written in C#
 
-### Useage ###
+Still in active development and will be for a while, probably come back when it's in a stable release.
+
+### Usage ###
 
 #### Events ####
 
