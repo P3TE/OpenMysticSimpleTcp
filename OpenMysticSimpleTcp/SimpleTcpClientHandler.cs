@@ -66,7 +66,7 @@ namespace OpenMysticSimpleTcp {
                 tcpClient.Connect(connectionEndpoint);
 
                 NetworkStream networkStream = tcpClient.GetStream();
-                streamReadHandler = new StreamReadHandler(networkStream);
+                streamReadHandler = new StreamReadHandler(networkStream, null);
                 streamWriteHandler = new StreamWriteHandler(networkStream);
 
                 clientConnectionState = ClientConnectionState.Connected;
@@ -78,11 +78,8 @@ namespace OpenMysticSimpleTcp {
             }
         }
 
-        protected override bool StopThreadSynchronous() {
-
+        protected override void StopThreadSynchronous() {
             CloseConnectionIfApplicable();
-
-            return true;
         }
 
         public void CloseConnectionIfApplicable() {

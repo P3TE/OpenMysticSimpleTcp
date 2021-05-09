@@ -88,7 +88,7 @@ namespace OpenMysticSimpleTcpExamples {
 
             while (true) {
 
-                simpleTcpServerHandler.HandleUpdates();
+                //simpleTcpServerHandler.HandleUpdates();
 
                 //Run at 10Hz.
                 Thread.Sleep(100);

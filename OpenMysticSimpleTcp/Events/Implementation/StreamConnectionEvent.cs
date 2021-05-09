@@ -26,7 +26,7 @@ namespace OpenMysticSimpleTcp.ReadWrite {
             return associatedException;
         }
 
-        public override void HandleEvent(IStreamEventHandler streamEventHandler) {
+        public void HandleEvent(IStreamEventHandler streamEventHandler) {
             streamEventHandler.OnStreamConnectionEvent(this);
         }
     }

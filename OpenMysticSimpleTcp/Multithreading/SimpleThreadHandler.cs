@@ -93,7 +93,7 @@ namespace OpenMysticSimpleTcp.Multithreading {
             return result;
         }
 
-        protected abstract bool StopThreadSynchronous();
+        protected abstract void StopThreadSynchronous();
 
         protected abstract void ThreadHandle(Object threadParameter);
 
